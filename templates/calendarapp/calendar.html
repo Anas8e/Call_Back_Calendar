@@ -27,6 +27,8 @@
                     {% for event in events_month %}
                       <div class="fc-event">
                           <h3>{{ event.title }}</h3>
+                          <p>{{ event.callback_number }}</p>
+                          <p>{{ event.account_number }}</p>
                           <p>{{ event.description }}</p>
                           <p>{{event.id}}</p>
                           <p>From: {{ event.start_time }}</p>
@@ -66,7 +68,7 @@
                                       <label for="account-number" class="col-form-label">Account Number:</label>
                                       {{ form.account_number }}
                                   </div>
-                              </div>
+                                </div>
                                 <div class="form-group">
                                     <label for="message-text" class="col-form-label">Description:</label>
                                     {{ form.description }}
@@ -100,35 +102,31 @@
                       <form method="">
                           {% csrf_token %}
                           <div class="modal-body">
-                              
                               <div class="form-group">
-                                <label for="callback-number" class="col-form-label">Callback Number:</label>
-                                <p id="callback_event_detail"></p>
-                            </div>
-                            <div class="form-group">
-                                <label for="account-number" class="col-form-label">Account Number:</label>
-                                <p id="account_event_detail"></p>
-                            </div>
+                                  <label for="callback-number" class="col-form-label">Callback Number:</label>
+                                  <p id="callback_event_detail"></p>
+                              </div>
+                              <div class="form-group">
+                                  <label for="account-number" class="col-form-label">Account Number:</label>
+                                  <p id="account_event_detail"></p>
+                              </div>
                               <div class="form-group">
                                   <label for="message-text" class="col-form-label">Description:</label>
-                                  <p id = "description_event_detail">
-
-                                  </p>
+                                  <p id="description_event_detail"></p>
                               </div>
                               <div class="form-group">
                                   <label for="message-text" class="col-form-label">Start:</label>
-                                  <p id = "start_event_detail">
+                                  <p id="start_event_detail"></p>
                               </div>
                               <div class="form-group">
                                   <label for="message-text" class="col-form-label">End:</label>
-                                  <p id = "end_event_detail">
+                                  <p id="end_event_detail"></p>
                               </div>
                           </div>
                           <div class="modal-footer">
                               <button id="delete-event-button" data-event-id="" type="button" class="btn btn-danger">Delete</button>
                               <button id="add-to-next-week" data-event-id-week="" type="button" class="btn btn-success">Next Week</button>
                               <button id="add-to-next-day" data-event-id-day="" type="button" class="btn btn-primary">Next Day</button>
-
                           </div>
                       </form>
                   </div>
@@ -154,7 +152,8 @@
       const formatoDjango = `${ano}-${mes}-${dia} ${hora}:${minuto}:${segundo}`;
       return formatoDjango;
   }
-    document.addEventListener('DOMContentLoaded', function() {
+
+  document.addEventListener('DOMContentLoaded', function() {
       var calendarEl = document.getElementById('calendar');
       var today = new Date();
 
@@ -178,30 +177,23 @@
           document.getElementById('id_end_time').value = converterDataParaDjangoFormat(arg.end);
           calendar.unselect()
         },
-        
-        // THIS KEY WON'T WORK IN PRODUCTION!!!
-        // To make your own Google API key, follow the directions here:
-        // http://fullcalendar.io/docs/google_calendar/
-        // googleCalendarApiKey: 'AIzaSyCqCxjjLtjbtkX37aOtWB8OfwBLy_6QuYk',
-
-        // bangladesh Holidays
-        // events: 'bn.bd#holiday@group.v.calendar.google.com',
         eventClick: function(arg) {
-          
           console.log('clicked')
           var title = arg.event.title;
-          var start = formatDateTime(arg.event.start) ;
+          var start = formatDateTime(arg.event.start);
           var end = formatDateTime(arg.event.end);
           var description = arg.event.extendedProps.description || '';
+          var callbackNumber = arg.event.extendedProps.callback_number || '';
+          var accountNumber = arg.event.extendedProps.account_number || '';
           var id = arg.event.id;
-
-          var modalInputEnd = document.getElementById('end_event_detail'); 
 
           var modal = document.getElementById('detailModal')
           var modalTitle = document.getElementById('title_event_detail'); 
           var modalStart = document.getElementById('start_event_detail'); 
           var modalEnd = document.getElementById('end_event_detail'); 
-          var modalDescripition = document.getElementById('description_event_detail'); 
+          var modalDescription = document.getElementById('description_event_detail'); 
+          var modalCallbackNumber = document.getElementById('callback_event_detail');
+          var modalAccountNumber = document.getElementById('account_event_detail');
           var deleteButton = document.getElementById("delete-event-button");
           var nextWeek = document.getElementById("add-to-next-week");
           var nextDay = document.getElementById("add-to-next-day");
@@ -209,65 +201,50 @@
           deleteButton.setAttribute("data-event-id", id);
           nextWeek.setAttribute("data-event-id-week", id);
           nextDay.setAttribute("data-event-id-day", id);
-          modal.style.display = 'block' 
-          
+
           modalTitle.textContent = title;
           modalStart.textContent = start;
           modalEnd.textContent = end;
-          modalDescripition.textContent = description;
-          
-         
+          modalDescription.textContent = description;
+          modalCallbackNumber.textContent = callbackNumber;
+          modalAccountNumber.textContent = accountNumber;
+
           modal.style.display = 'block';
         },
         editable: true,
         dayMaxEvents: true, // allow "more" link when too many events
         events: {{ events|safe }},
-        // events: [
-        //   {
-        //     title: 'All Day Event',
-        //     start: '2021-06-26'
-        //   },
-        //   {
-        //     groupId: 999,
-        //     title: 'Repeating Event',
-        //     start: '2020-09-16T16:00:00'
-        //   },
-        //   {
-        //     title: 'Conference',
-        //     start: '2020-09-11',
-        //     end: '2020-09-13'
-        //   },
-        //   {
-        //     title: 'Click for Google',
-        //     url: 'http://google.com/',
-        //     start: '2020-09-28'
-        //   }
-        // ]
       });
 
       calendar.render();
-    });
-    const closeBtn1 = document.getElementById('modalClose1');
-    const closeBtn2 = document.getElementById('modalClose2');
-    const closeBtn3 = document.getElementById('modalDetailClose');
-    closeBtn1.addEventListener('click',()=>{
+  });
+
+  const closeBtn1 = document.getElementById('modalClose1');
+  const closeBtn2 = document.getElementById('modalClose2');
+  const closeBtn3 = document.getElementById('modalDetailClose');
+  closeBtn1.addEventListener('click', () => {
       const eventModal = document.getElementById('eventModal')
       eventModal.style.display = 'none';
-    });
-    closeBtn2.addEventListener('click',()=>{
+  });
+  closeBtn2.addEventListener('click', () => {
       const eventModal = document.getElementById('eventModal')
       eventModal.style.display = 'none';
-    });
-    closeBtn3.addEventListener('click',()=>{
+  });
+  closeBtn3.addEventListener('click', () => {
       const eventModal = document.getElementById('detailModal')
       eventModal.style.display = 'none';
-    });
-    function formatDateTime(dateTime) {
-      const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short' };
+  });
+
+  function formatDateTime(dateTime) {
+      const options = {
+          weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+          hour: '2-digit', minute: '2-digit', second: '2-digit', timeZoneName: 'short'
+      };
       const dataFormatada = new Date(dateTime).toLocaleDateString('en-US', options);
       return dataFormatada;
-    };
-    document.getElementById('delete-event-button').addEventListener('click', function() {
+  }
+
+  document.getElementById('delete-event-button').addEventListener('click', function() {
       const eventId = this.getAttribute('data-event-id');
       if (confirm('Are you sure you want to delete this event?')) {
           $.ajax({
@@ -283,50 +260,49 @@
               error: function(xhr, status, error) {
                   alert('Error!');
               }
-          
           });
-      }});
-      
-      document.getElementById('add-to-next-week').addEventListener('click', function() {
-          const eventId = this.getAttribute('data-event-id-week');
-          if (confirm('Are you sure you want add this event to next week?')) {
-              $.ajax({
-                url: `/next_week/${eventId}/`,
-                  type: 'POST',
-                  data: {
-                      csrfmiddlewaretoken: '{{ csrf_token }}',
-                  },
-                  success: function(response) {
-                      alert(response.message);
-                      window.location.reload();
-                  },
-                  error: function(xhr, status, error) {
-                      alert('Error!');
-                  }
-              });
-          }
+      }
+  });
+
+  document.getElementById('add-to-next-week').addEventListener('click', function() {
+      const eventId = this.getAttribute('data-event-id-week');
+      if (confirm('Are you sure you want add this event to next week?')) {
+          $.ajax({
+              url: `/next_week/${eventId}/`,
+              type: 'POST',
+              data: {
+                  csrfmiddlewaretoken: '{{ csrf_token }}',
+              },
+              success: function(response) {
+                  alert(response.message);
+                  window.location.reload();
+              },
+              error: function(xhr, status, error) {
+                  alert('Error!');
+              }
+          });
+      }
   });
 
   document.getElementById('add-to-next-day').addEventListener('click', function() {
-    const eventId = this.getAttribute('data-event-id-day');
-    if (confirm('Are you sure you want add this event to next day?')) {
-        $.ajax({
-          url: `/next_day/${eventId}/`,
-            type: 'POST',
-            data: {
-                csrfmiddlewaretoken: '{{ csrf_token }}',
-            },
-            success: function(response) {
-                alert(response.message);
-                window.location.reload();
-            },
-            error: function(xhr, status, error) {
-                alert('Error!');
-            }
-        });
-    }
-});
+      const eventId = this.getAttribute('data-event-id-day');
+      if (confirm('Are you sure you want add this event to next day?')) {
+          $.ajax({
+              url: `/next_day/${eventId}/`,
+              type: 'POST',
+              data: {
+                  csrfmiddlewaretoken: '{{ csrf_token }}',
+              },
+              success: function(response) {
+                  alert(response.message);
+                  window.location.reload();
+              },
+              error: function(xhr, status, error) {
+                  alert('Error!');
+              }
+          });
+      }
+  });
 
 </script>
 {% endblock extrascripts %}
-
